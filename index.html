@@ -155,6 +155,7 @@
     padding:16px 28px;
     border:1px solid var(--decline);
     z-index:9999;
+    white-space:nowrap;
   }
   #nao:hover{
     color:var(--ink);
@@ -168,6 +169,79 @@
     font-size:14px;
     font-weight:500;
     letter-spacing:0.2px;
+  }
+
+
+  @media (max-width:600px){
+    body{
+      padding:20px;
+      min-height:100svh;
+    }
+
+    .cartao{
+      width:100%;
+      max-width:440px;
+      padding:42px 22px 34px;
+      border-radius:10px;
+    }
+
+    h1{
+      font-size:clamp(30px, 9vw, 38px);
+      margin-bottom:14px;
+    }
+
+    p.sub{
+      font-size:14.5px;
+      line-height:1.6;
+      margin-bottom:30px;
+    }
+
+    .botoes{
+      gap:10px;
+      min-height:58px;
+      width:100%;
+    }
+
+    .botoes button{
+      font-size:13px;
+      min-height:52px;
+    }
+
+    #sim{
+      padding:15px 20px;
+    }
+
+    #nao{
+      padding:15px 18px;
+    }
+
+    #mensagem{
+      font-size:13px;
+      line-height:1.5;
+      margin-top:22px;
+    }
+  }
+
+  @media (max-width:380px){
+    .cartao{
+      padding:34px 16px 28px;
+    }
+
+    .botoes{
+      gap:8px;
+    }
+
+    .botoes button{
+      font-size:12px;
+    }
+
+    #sim{
+      padding:14px 15px;
+    }
+
+    #nao{
+      padding:14px 13px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -203,40 +277,53 @@
 
   const numero = "5591998149193";
 
-  // O cartão tem uma animação com transform, o que faz dele o "containing
-  // block" de qualquer descendente position:fixed — isso bagunça os cálculos
-  // de posição do botão "não". Solução: tirar o botão de dentro do cartão e
-  // colocá-lo direto no body, mantendo a posição visual onde ele já estava.
+  let botaoComecouAFugir = false;
+
+  // Mantém o "Não" exatamente ao lado do "Sim" no início.
+  // Só depois da primeira tentativa de interação ele passa a usar posição fixa.
+  function posicionarInicialmente() {
+    if (botaoComecouAFugir) return;
+
+    const botoes = document.querySelector(".botoes");
+    const rect = botoes.getBoundingClientRect();
+    const simRect = botaoSim.getBoundingClientRect();
+
+    botaoNao.style.position = "fixed";
+    botaoNao.style.margin = "0";
+    botaoNao.style.left = (simRect.right + 10) + "px";
+    botaoNao.style.top = simRect.top + "px";
+  }
+
   window.addEventListener("load", function () {
+    // Tiramos o botão do cartão para ele poder fugir livremente pela tela,
+    // mas preservamos sua posição inicial ao lado do "Sim".
     const rect = botaoNao.getBoundingClientRect();
     document.body.appendChild(botaoNao);
+
     botaoNao.style.position = "fixed";
     botaoNao.style.margin = "0";
     botaoNao.style.left = rect.left + "px";
     botaoNao.style.top = rect.top + "px";
+
+    // Recalcula depois que fontes e layout estiverem prontos.
+    requestAnimationFrame(posicionarInicialmente);
   });
 
-  botaoSim.addEventListener("click", function () {
-    const texto = "Claro que quero sair com você 🥂";
-    const whatsapp = "https://wa.me/" + numero + "?text=" + encodeURIComponent(texto);
-
-    // Abre o WhatsApp já no clique (gesto do usuário), senão o navegador
-    // trata como pop-up automático e bloqueia.
-    window.open(whatsapp, "_blank", "noopener");
-
-    mensagem.style.display = "block";
-    criarParticulas();
+  window.addEventListener("resize", function () {
+    if (!botaoComecouAFugir) {
+      posicionarInicialmente();
+    } else {
+      manterBotaoNaTela();
+    }
   });
 
   function fugir() {
+    botaoComecouAFugir = true;
+
     const larguraBotao = botaoNao.offsetWidth;
     const alturaBotao = botaoNao.offsetHeight;
+    const margem = 14;
 
-    const margem = 20;
-    const insetTop = parseFloat(getComputedStyle(document.documentElement).paddingTop) || 0;
-    const insetBottom = parseFloat(getComputedStyle(document.documentElement).paddingBottom) || 0;
-
-    // usa a área de visualização visual (funciona melhor com teclado/zoom no mobile)
     const vv = window.visualViewport;
     const largura = vv ? vv.width : window.innerWidth;
     const altura = vv ? vv.height : window.innerHeight;
@@ -245,8 +332,8 @@
 
     const minX = offsetX + margem;
     const maxX = offsetX + largura - larguraBotao - margem;
-    const minY = offsetY + margem + insetTop;
-    const maxY = offsetY + altura - alturaBotao - margem - insetBottom;
+    const minY = offsetY + margem;
+    const maxY = offsetY + altura - alturaBotao - margem;
 
     const novaX = minX + Math.random() * Math.max(0, maxX - minX);
     const novaY = minY + Math.random() * Math.max(0, maxY - minY);
@@ -256,16 +343,39 @@
     botaoNao.style.top = novaY + "px";
   }
 
+  function manterBotaoNaTela() {
+    if (!botaoComecouAFugir) return;
+
+    const margem = 10;
+    const larguraBotao = botaoNao.offsetWidth;
+    const alturaBotao = botaoNao.offsetHeight;
+
+    const largura = window.innerWidth;
+    const altura = window.innerHeight;
+
+    let x = parseFloat(botaoNao.style.left) || margem;
+    let y = parseFloat(botaoNao.style.top) || margem;
+
+    x = Math.max(margem, Math.min(x, largura - larguraBotao - margem));
+    y = Math.max(margem, Math.min(y, altura - alturaBotao - margem));
+
+    botaoNao.style.left = x + "px";
+    botaoNao.style.top = y + "px";
+  }
+
   botaoNao.addEventListener("mouseenter", fugir);
   botaoNao.addEventListener("pointerdown", function (event) {
+    // No celular/tablet, impede o toque de realmente clicar e faz o botão fugir.
     if (event.pointerType !== "mouse") {
       event.preventDefault();
       fugir();
     }
   });
-  window.addEventListener("resize", function () {
-    if (botaoNao.style.position === "fixed") fugir();
-  });
+
+  botaoNao.addEventListener("touchstart", function (event) {
+    event.preventDefault();
+    fugir();
+  }, {passive:false});
 
   function criarParticulas() {
     for (let i = 0; i < 22; i++) {
