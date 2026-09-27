@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Um convite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#120d1a;
+    --bg-1:#1c1428;
+    --card:rgba(255,255,255,0.045);
+    --card-border:rgba(230,210,255,0.14);
+    --ink:#f3ede2;
+    --ink-dim:#b6a9c9;
+    --gold:#cda86a;
+    --gold-soft:#e7d3a4;
+    --decline:#4a3e5c;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html,body{height:100%;}
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 20% 15%, rgba(205,168,106,0.10), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(139,95,191,0.14), transparent 50%),
+      linear-gradient(160deg, var(--bg-0), var(--bg-1));
+    background-color:var(--bg-0);
+    position:relative;
+  }
+
+  .grain{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:0.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .partículas{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:5;
+  }
+  .partícula{
+    position:absolute;
+    bottom:-20px;
+    border-radius:50%;
+    background:radial-gradient(circle, var(--gold-soft), var(--gold) 70%);
+    box-shadow:0 0 6px rgba(205,168,106,0.7);
+    animation:subir linear forwards;
+  }
+  @keyframes subir{
+    from{transform:translateY(0) scale(1);opacity:0.9;}
+    to{transform:translateY(-105vh) scale(0.4);opacity:0;}
+  }
+
+  .cartao{
+    width:92%;
+    max-width:440px;
+    padding:56px 40px 44px;
+    text-align:center;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:6px;
+    backdrop-filter:blur(6px);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+    position:relative;
+    opacity:0;
+    animation:entrar 0.9s cubic-bezier(.19,1,.22,1) 0.15s forwards;
+  }
+  @keyframes entrar{
+    from{opacity:0;transform:translateY(18px) scale(0.98);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
+
+  .risco{
+    width:34px;
+    height:1px;
+    background:var(--gold);
+    margin:0 auto 22px;
+  }
+
+  h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    font-size:clamp(30px, 6vw, 40px);
+    line-height:1.15;
+    color:var(--ink);
+    margin-bottom:18px;
+    letter-spacing:0.2px;
+  }
+
+  p.sub{
+    font-size:15.5px;
+    line-height:1.65;
+    color:var(--ink-dim);
+    max-width:320px;
+    margin:0 auto 38px;
+    font-weight:400;
+  }
+
+  .botoes{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:16px;
+    position:relative;
+    min-height:56px;
+  }
+
+  button{
+    font-family:'Inter',sans-serif;
+    border:none;
+    cursor:pointer;
+    font-size:14.5px;
+    font-weight:600;
+    letter-spacing:0.2px;
+    border-radius:3px;
+    transition:transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+
+  #sim{
+    background:linear-gradient(135deg, var(--gold-soft), var(--gold));
+    color:#241a10;
+    padding:16px 34px;
+    box-shadow:0 10px 24px -8px rgba(205,168,106,0.55);
+  }
+  #sim:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 28px -8px rgba(205,168,106,0.7);
+  }
+  #sim:focus-visible, #nao:focus-visible{
+    outline:2px solid var(--gold-soft);
+    outline-offset:3px;
+  }
+
+  #nao{
+    background:transparent;
+    color:var(--ink-dim);
+    padding:16px 28px;
+    border:1px solid var(--decline);
+    z-index:9999;
+  }
+  #nao:hover{
+    color:var(--ink);
+    border-color:var(--ink-dim);
+  }
+
+  #mensagem{
+    display:none;
+    margin-top:26px;
+    color:var(--gold-soft);
+    font-size:14px;
+    font-weight:500;
+    letter-spacing:0.2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .cartao{animation:none;opacity:1;}
+    button{transition:none;}
+    .partícula{animation:none;display:none;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="grain"></div>
+  <div class="partículas" id="particulas"></div>
+
+  <div class="cartao">
+    <div class="risco"></div>
+    <h1>Aceita sair comigo?</h1>
+    <p class="sub">fala da criatividade aikkkkkk.</p>
+
+    <div class="botoes">
+      <button id="sim">Sim, aceito seu chato</button>
+      <button id="nao">Eu mesmo não kkk</button>
+    </div>
+
+    <div id="mensagem">Eu sabia que você ia dizer sim kkkkkkkkkk.</div>
+  </div>
+
+<script>
+  const botaoSim = document.getElementById("sim");
+  const botaoNao = document.getElementById("nao");
+  const mensagem = document.getElementById("mensagem");
+  const camada = document.getElementById("particulas");
+
+  const numero = "5591998149193";
+
+  // O cartão tem uma animação com transform, o que faz dele o "containing
+  // block" de qualquer descendente position:fixed — isso bagunça os cálculos
+  // de posição do botão "não". Solução: tirar o botão de dentro do cartão e
+  // colocá-lo direto no body, mantendo a posição visual onde ele já estava.
+  window.addEventListener("load", function () {
+    const rect = botaoNao.getBoundingClientRect();
+    document.body.appendChild(botaoNao);
+    botaoNao.style.position = "fixed";
+    botaoNao.style.margin = "0";
+    botaoNao.style.left = rect.left + "px";
+    botaoNao.style.top = rect.top + "px";
+  });
+
+  botaoSim.addEventListener("click", function () {
+    const texto = "Claro que quero sair com você 🥂";
+    const whatsapp = "https://wa.me/" + numero + "?text=" + encodeURIComponent(texto);
+
+    // Abre o WhatsApp já no clique (gesto do usuário), senão o navegador
+    // trata como pop-up automático e bloqueia.
+    window.open(whatsapp, "_blank", "noopener");
+
+    mensagem.style.display = "block";
+    criarParticulas();
+  });
+
+  function fugir() {
+    const larguraBotao = botaoNao.offsetWidth;
+    const alturaBotao = botaoNao.offsetHeight;
+
+    const margem = 20;
+    const insetTop = parseFloat(getComputedStyle(document.documentElement).paddingTop) || 0;
+    const insetBottom = parseFloat(getComputedStyle(document.documentElement).paddingBottom) || 0;
+
+    // usa a área de visualização visual (funciona melhor com teclado/zoom no mobile)
+    const vv = window.visualViewport;
+    const largura = vv ? vv.width : window.innerWidth;
+    const altura = vv ? vv.height : window.innerHeight;
+    const offsetX = vv ? vv.offsetLeft : 0;
+    const offsetY = vv ? vv.offsetTop : 0;
+
+    const minX = offsetX + margem;
+    const maxX = offsetX + largura - larguraBotao - margem;
+    const minY = offsetY + margem + insetTop;
+    const maxY = offsetY + altura - alturaBotao - margem - insetBottom;
+
+    const novaX = minX + Math.random() * Math.max(0, maxX - minX);
+    const novaY = minY + Math.random() * Math.max(0, maxY - minY);
+
+    botaoNao.style.position = "fixed";
+    botaoNao.style.left = novaX + "px";
+    botaoNao.style.top = novaY + "px";
+  }
+
+  botaoNao.addEventListener("mouseenter", fugir);
+  botaoNao.addEventListener("pointerdown", function (event) {
+    if (event.pointerType !== "mouse") {
+      event.preventDefault();
+      fugir();
+    }
+  });
+  window.addEventListener("resize", function () {
+    if (botaoNao.style.position === "fixed") fugir();
+  });
+
+  function criarParticulas() {
+    for (let i = 0; i < 22; i++) {
+      const p = document.createElement("div");
+      p.classList.add("partícula");
+
+      const tamanho = 4 + Math.random() * 6;
+      p.style.width = tamanho + "px";
+      p.style.height = tamanho + "px";
+      p.style.left = Math.random() * 100 + "%";
+      p.style.animationDuration = (3.5 + Math.random() * 2.5) + "s";
+
+      camada.appendChild(p);
+      setTimeout(() => p.remove(), 6500);
+    }
+  }
+</script>
+
+</body>
+</html>
