@@ -279,70 +279,62 @@
   const numero = "5591998149193";
 
   let botaoComecouAFugir = false;
-
-  // Mantém o "Não" exatamente ao lado do "Sim" no início.
-  // Só depois da primeira tentativa de interação ele passa a usar posição fixa.
-  function posicionarInicialmente() {
-    if (botaoComecouAFugir) return;
-
-    const botoes = document.querySelector(".botoes");
-    const rect = botoes.getBoundingClientRect();
-    const simRect = botaoSim.getBoundingClientRect();
-
-    botaoNao.style.position = "fixed";
-    botaoNao.style.margin = "0";
-    botaoNao.style.left = (simRect.right + 10) + "px";
-    botaoNao.style.top = simRect.top + "px";
-  }
-
-  window.addEventListener("load", function () {
-    // Tiramos o botão do cartão para ele poder fugir livremente pela tela,
-    // mas preservamos sua posição inicial ao lado do "Sim".
-    const rect = botaoNao.getBoundingClientRect();
-    document.body.appendChild(botaoNao);
-
-    botaoNao.style.position = "fixed";
-    botaoNao.style.margin = "0";
-    botaoNao.style.left = rect.left + "px";
-    botaoNao.style.top = rect.top + "px";
-
-    // Recalcula depois que fontes e layout estiverem prontos.
-    requestAnimationFrame(posicionarInicialmente);
-  });
+  let botaoAnexado = false;
 
   window.addEventListener("resize", function () {
-    if (!botaoComecouAFugir) {
-      posicionarInicialmente();
-    } else {
+    if (botaoComecouAFugir) {
       manterBotaoNaTela();
     }
+    // Enquanto o botão "não" ainda está no fluxo normal do flexbox,
+    // o próprio CSS já mantém o alinhamento certinho ao lado do "sim".
   });
 
   function fugir() {
+    // "Congela" o botão exatamente onde ele está (ainda alinhado pelo
+    // flexbox) antes de tirá-lo do fluxo normal, evitando qualquer salto.
+    if (!botaoAnexado) {
+      const rect = botaoNao.getBoundingClientRect();
+      document.body.appendChild(botaoNao);
+      botaoNao.style.position = "fixed";
+      botaoNao.style.margin = "0";
+      botaoNao.style.left = rect.left + "px";
+      botaoNao.style.top = rect.top + "px";
+      botaoAnexado = true;
+    }
+
     botaoComecouAFugir = true;
 
-    const larguraBotao = botaoNao.offsetWidth;
-    const alturaBotao = botaoNao.offsetHeight;
-    const margem = 14;
+    requestAnimationFrame(function () {
+      const larguraBotao = botaoNao.offsetWidth;
+      const alturaBotao = botaoNao.offsetHeight;
+      const margem = 14;
 
-    const vv = window.visualViewport;
-    const largura = vv ? vv.width : window.innerWidth;
-    const altura = vv ? vv.height : window.innerHeight;
-    const offsetX = vv ? vv.offsetLeft : 0;
-    const offsetY = vv ? vv.offsetTop : 0;
+      const vv = window.visualViewport;
+      const largura = vv ? vv.width : window.innerWidth;
+      const altura = vv ? vv.height : window.innerHeight;
+      const offsetX = vv ? vv.offsetLeft : 0;
+      const offsetY = vv ? vv.offsetTop : 0;
 
-    const minX = offsetX + margem;
-    const maxX = offsetX + largura - larguraBotao - margem;
-    const minY = offsetY + margem;
-    const maxY = offsetY + altura - alturaBotao - margem;
+      const minX = offsetX + margem;
+      const maxX = offsetX + largura - larguraBotao - margem;
+      const minY = offsetY + margem;
+      const maxY = offsetY + altura - alturaBotao - margem;
 
-    const novaX = minX + Math.random() * Math.max(0, maxX - minX);
-    const novaY = minY + Math.random() * Math.max(0, maxY - minY);
+      const novaX = minX + Math.random() * Math.max(0, maxX - minX);
+      const novaY = minY + Math.random() * Math.max(0, maxY - minY);
 
-    botaoNao.style.position = "fixed";
-    botaoNao.style.left = novaX + "px";
-    botaoNao.style.top = novaY + "px";
+      botaoNao.style.left = novaX + "px";
+      botaoNao.style.top = novaY + "px";
+    });
   }
+
+  botaoSim.addEventListener("click", function () {
+    mensagem.style.display = "block";
+    criarParticulas();
+
+    const texto = encodeURIComponent("claro que aceito seu chato kkk");
+    window.open("https://wa.me/" + numero + "?text=" + texto, "_blank");
+  });
 
   function manterBotaoNaTela() {
     if (!botaoComecouAFugir) return;
